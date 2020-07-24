@@ -101,7 +101,7 @@ def main():
         'v.db.select', map=input,
         column=column, flags='c')
 
-    grass.message("Select points for each class...")
+    grass.message("Selecting points for each class...")
     training_cats = []
     validation_cats = []
     for cl in classes:
