@@ -123,7 +123,7 @@ def main():
     grass.message(_("Extracting validation points..."))
     extract_data(input, validation, validation_cats, 2)
 
-    grass.message("Divided data in <%s> and <%s>" % (training, validation))
+    grass.message("Divided data into <%s> and <%s>" % (training, validation))
 
 
 if __name__ == "__main__":
