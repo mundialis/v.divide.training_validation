@@ -72,10 +72,10 @@ def extract_data(input, output, cats, value):
         n = 500
         for i in range(0, len(cats), n):
             cats_list = cats[i:i+n]
-            where_list = ["cat='%s'" % (cat) for cat in cats_list]
             grass.run_command(
-                    'v.db.update', where=' OR '.join(where_list),
-                    map=input, column=newcol, value=value, quiet=True)
+                     'v.db.update',
+                     where='cat IN (%s)' % (','.join(cats_list)),
+                     map=input, column=newcol, value=value, quiet=True)
             grass.percent(i+n, len(cats), 1)
         grass.run_command(
             'v.extract', input=input, output=output,
