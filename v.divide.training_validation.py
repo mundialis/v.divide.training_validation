@@ -45,20 +45,50 @@
 #% answer: 30
 #%end
 
-from grass.script import core as grass
+import grass.script as grass
 import os
 import random
+import atexit
+
+newcol = None
 
 
-def cleanup(rm_vectors):
+def cleanup():
     grass.message(_("Cleaning up..."))
-    nuldev = open(os.devnull, 'w')
-    for rm_v in rm_vectors:
+    if newcol:
+        columns_existing = grass.vector_columns(options['input']).keys()
+        if newcol in columns_existing:
+            grass.run_command(
+                    'v.db.dropcolumn', map=options['input'], columns=newcol)
+
+
+def extract_data(input, output, cats, value):
+    if len(cats) > 20000:
+        newcol = 'train_val_%s' % (os.getpid())
+        columns_existing = grass.vector_columns(options['input']).keys()
+        if newcol not in columns_existing:
+            grass.run_command(
+                'v.db.addcolumn', map=input, columns='%s INTEGER' % (newcol))
+        n = 500
+        for i in range(0, len(cats), n):
+            cats_list = cats[i:i+n]
+            where_list = ["cat='%s'" % (cat) for cat in cats_list]
+            grass.run_command(
+                    'v.db.update', where=' OR '.join(where_list),
+                    map=input, column=newcol, value=value, quiet=True)
+            grass.percent(i+n, len(cats), 1)
         grass.run_command(
-            'g.remove', flags='f', type='vector', name=rm_v, quiet=True, stderr=nuldev)
+            'v.extract', input=input, output=output,
+            where="%s='%d'" % (newcol, value))
+    else:
+        grass.run_command(
+            'v.extract', input=input, cats=','.join(cats),
+            output=output)
 
 
 def main():
+    global newcol
+
     input = options['input']
     column = options['column']
     training = options['training']
@@ -71,7 +101,7 @@ def main():
         'v.db.select', map=input,
         column=column, flags='c')
 
-    grass.message("Select point for each class...")
+    grass.message("Selecting points for each class...")
     training_cats = []
     validation_cats = []
     for cl in classes:
@@ -88,15 +118,15 @@ def main():
         training_cats.extend(cats_tr)
         validation_cats.extend(cats_val)
 
-    grass.message("Extract training and validation points...")
-    grass.run_command(
-        'v.extract', input=input, cats=','.join(training_cats), output=training)
-    grass.run_command(
-        'v.extract', input=input, cats=','.join(validation_cats), output=validation)
+    grass.message(_("Extracting training points..."))
+    extract_data(input, training, training_cats, 1)
+    grass.message(_("Extracting validation points..."))
+    extract_data(input, validation, validation_cats, 2)
 
-    grass.message("Divided data in <%s> and <%s>" % (training, validation))
+    grass.message("Divided data into <%s> and <%s>" % (training, validation))
 
 
 if __name__ == "__main__":
     options, flags = grass.parser()
+    atexit.register(cleanup)
     main()
