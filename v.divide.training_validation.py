@@ -59,7 +59,7 @@ def cleanup():
         columns_existing = grass.vector_columns(options['input']).keys()
         if newcol in columns_existing:
             grass.run_command(
-                    'v.db.dropcolumn', map=options['input'], columns=newcol)
+                'v.db.dropcolumn', map=options['input'], columns=newcol)
 
 
 def extract_data(input, output, cats, value):
@@ -73,7 +73,7 @@ def extract_data(input, output, cats, value):
         for i in range(0, len(cats), n):
             cats_list = cats[i:i+n]
             grass.run_command(
-                     'v.db.update',
+                'v.db.update',
                      where='cat IN (%s)' % (','.join(cats_list)),
                      map=input, column=newcol, value=value, quiet=True)
             grass.percent(i+n, len(cats), 1)
