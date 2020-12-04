@@ -31,8 +31,8 @@ class Testdivide(TestCase):
     @classmethod
     def tearDownClass(cls):
         """Remove the temporary region and generated data"""
-#        cls.runModule('g.remove', flags='f', type='vector',
-#                      name=(cls.outtrain, cls.outvalid))
+        cls.runModule('g.remove', flags='f', type='vector',
+                      name=(cls.inpoint,cls.outtrain, cls.outvalid))
         cls.del_temp_region()
 
     def test_points(self):
