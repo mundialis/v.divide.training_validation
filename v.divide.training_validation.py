@@ -13,37 +13,37 @@
 #              for details.
 #
 #############################################################################
-#%module
-#% description: divides data into training and validation data.
-#% keyword: vector
-#% keyword: sampling
-#% keyword: statistics
-#% keyword: random
-#% keyword: stratified random sampling
-#%end
+# %module
+# % description: divides data into training and validation data.
+# % keyword: vector
+# % keyword: sampling
+# % keyword: statistics
+# % keyword: random
+# % keyword: stratified random sampling
+# %end
 
-#%option G_OPT_V_INPUT
-#%end
+# %option G_OPT_V_INPUT
+# %end
 
-#%option G_OPT_DB_COLUMN
-#% description: Name of column with class information
-#%end
+# %option G_OPT_DB_COLUMN
+# % description: Name of column with class information
+# %end
 
-#%option G_OPT_V_OUTPUT
-#% key: training
-#%end
+# %option G_OPT_V_OUTPUT
+# % key: training
+# %end
 
-#%option G_OPT_V_OUTPUT
-#% key: validation
-#%end
+# %option G_OPT_V_OUTPUT
+# % key: validation
+# %end
 
-#%option
-#% key: training_percent
-#% type: integer
-#% required: no
-#% description: Percent of data which should be selected as training data
-#% answer: 30
-#%end
+# %option
+# % key: training_percent
+# % type: integer
+# % required: no
+# % description: Percent of data which should be selected as training data
+# % answer: 30
+# %end
 
 import grass.script as grass
 import os
@@ -56,50 +56,59 @@ newcol = None
 def cleanup():
     grass.message(_("Cleaning up..."))
     if newcol:
-        columns_existing = grass.vector_columns(options['input']).keys()
+        columns_existing = grass.vector_columns(options["input"]).keys()
         if newcol in columns_existing:
             grass.run_command(
-                'v.db.dropcolumn', map=options['input'], columns=newcol)
+                "v.db.dropcolumn", map=options["input"], columns=newcol
+            )
 
 
 def extract_data(input, output, cats, value):
     if len(cats) > 20000:
-        newcol = 'train_val_%s' % (os.getpid())
-        columns_existing = grass.vector_columns(options['input']).keys()
+        newcol = "train_val_%s" % (os.getpid())
+        columns_existing = grass.vector_columns(options["input"]).keys()
         if newcol not in columns_existing:
             grass.run_command(
-                'v.db.addcolumn', map=input, columns='%s INTEGER' % (newcol))
+                "v.db.addcolumn", map=input, columns="%s INTEGER" % (newcol)
+            )
         n = 500
         for i in range(0, len(cats), n):
-            cats_list = cats[i:i+n]
+            cats_list = cats[i:i + n]
             grass.run_command(
-                'v.db.update',
-                     where='cat IN (%s)' % (','.join(cats_list)),
-                     map=input, column=newcol, value=value, quiet=True)
-            grass.percent(i+n, len(cats), 1)
+                "v.db.update",
+                where="cat IN (%s)" % (",".join(cats_list)),
+                map=input,
+                column=newcol,
+                value=value,
+                quiet=True,
+            )
+            grass.percent(i + n, len(cats), 1)
         grass.run_command(
-            'v.extract', input=input, output=output,
-            where="%s='%d'" % (newcol, value))
+            "v.extract",
+            input=input,
+            output=output,
+            where="%s='%d'" % (newcol, value),
+        )
     else:
         grass.run_command(
-            'v.extract', input=input, cats=','.join(cats),
-            output=output)
+            "v.extract", input=input, cats=",".join(cats), output=output
+        )
 
 
 def main():
     global newcol
 
-    input = options['input']
-    column = options['column']
-    training = options['training']
-    validation = options['validation']
-    training_percent = options['training_percent']
+    input = options["input"]
+    column = options["column"]
+    training = options["training"]
+    validation = options["validation"]
+    training_percent = options["training_percent"]
 
     # get classes
     grass.message("Getting classes...")
     classes = grass.parse_command(
-        'v.db.select', map=input,
-        column=column, flags='c')
+        "v.db.select", map=input, column=column, flags="c"
+    )
 
     grass.message("Selecting points for each class...")
     training_cats = []
@@ -107,8 +116,8 @@ def main():
     for cl in classes:
         where_str = "%s = '%s'" % (column, cl)
         classI = grass.parse_command(
-            'v.db.select', map=input, columns='cat',
-            flags='c', where=where_str)
+            "v.db.select", map=input, columns="cat", flags="c", where=where_str
+        )
         cats_classI = [x for x in classI]
         random.shuffle(cats_classI)
         num_classI = len(cats_classI)
