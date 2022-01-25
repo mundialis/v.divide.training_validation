@@ -5,5 +5,7 @@
 
 exclude = .git
 
+max-line-length = 88
+
 per-file-ignores =
     ./v.divide.training_validation.py: F821
