@@ -73,7 +73,7 @@ def extract_data(input, output, cats, value):
             )
         n = 500
         for i in range(0, len(cats), n):
-            cats_list = cats[i:i + n]
+            cats_list = cats[i : i + n]
             grass.run_command(
                 "v.db.update",
                 where="cat IN (%s)" % (",".join(cats_list)),
