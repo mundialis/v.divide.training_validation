@@ -7,6 +7,8 @@ exclude = .git
 
 max-line-length = 88
 
+ignore =
+    E203  # whitespace before ':' (Black)
+
 per-file-ignores =
-    ./v.divide.training_validation.py: F821,
-    ./v.divide.training_validation.py: E203  # whitespace before ':' (Black)
+    ./v.divide.training_validation.py: F821
