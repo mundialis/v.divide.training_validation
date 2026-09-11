@@ -45,15 +45,19 @@
 # % answer: 30
 # %end
 
-import grass.script as grass
 import os
 import random
 import atexit
+import grass.script as grass
+
 
 newcol = None
 
 
 def cleanup():
+    """
+    Cleanup function to remove temporary data.
+    """
     grass.message(_("Cleaning up..."))
     if newcol:
         columns_existing = grass.vector_columns(options["input"]).keys()
@@ -64,6 +68,9 @@ def cleanup():
 
 
 def extract_data(input, output, cats, value):
+    """
+    Extracts data from input vector map based on category list and writes to output vector map.
+    """
     if len(cats) > 20000:
         newcol = "train_val_%s" % (os.getpid())
         columns_existing = grass.vector_columns(options["input"]).keys()
@@ -96,6 +103,10 @@ def extract_data(input, output, cats, value):
 
 
 def main():
+    """
+    Divide input into training and validation data.
+    """
+
     global newcol
 
     input = options["input"]
