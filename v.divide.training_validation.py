@@ -68,7 +68,8 @@ def cleanup():
 
 def extract_data(input, output, cats, value):
     """
-    Extracts data from input vector map based on category list and writes to output vector map.
+    Extracts data from input vector map based on category list and
+    writes to output vector map.
     """
     if len(cats) > 20000:
         newcol = "train_val_%s" % (os.getpid())
@@ -107,6 +108,7 @@ def main():
     """
 
     global newcol
+    newcol = None
 
     input = options["input"]
     column = options["column"]
