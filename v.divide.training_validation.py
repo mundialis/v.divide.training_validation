@@ -50,7 +50,6 @@ import random
 import atexit
 import grass.script as grass
 
-
 newcol = None
 
 
